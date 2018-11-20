@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<atlas version="1.0">
+  <header>
+    <name>Oxford Thalamic Connectivity Probability Atlas</name>
+    <shortname>OTCPA</shortname>
+    <type>Probabilistic</type>
+    <images>
+      <imagefile>/Thalamus/Thalamus-prob-1mm</imagefile>
+      <summaryimagefile>/Thalamus/Thalamus-maxprob-thr25-1mm</summaryimagefile>
+    </images>
+    <images>
+      <imagefile>/Thalamus/Thalamus-prob-2mm</imagefile>
+      <summaryimagefile>/Thalamus/Thalamus-maxprob-thr25-2mm</summaryimagefile>
+    </images>
+  </header>
+  <data>
+<label index="0" x="74" y="104" z="72">Primary motor</label>
+<label index="1" x="106" y="101" z="73">Sensory</label>
+<label index="2" x="103" y="95" z="76">Occipital</label>
+<label index="3" x="99" y="114" z="77">Pre-frontal</label>
+<label index="4" x="71" y="109" z="81">Pre-motor</label>
+<label index="5" x="110" y="99" z="75">Posterior parietal</label>
+<label index="6" x="101" y="97" z="83">Temporal</label>
+  </data>
+</atlas>

@@ -66,15 +66,9 @@ global roi2atlas_atlas_vector_struct roi2atlas_vector_check_input  %for vector
 %--------------------------------------------------------------------------
 %                      system/tool check
 %--------------------------------------------------------------------------
-
 if exist('load_nii') == 0 
     fprintf('>This function requires NifTI/ANALYZE tool.\n You can download the last version from:\n http://research.baycrest.org/~jimmy/NIfTI/');
     return
-end
-
-if ~isunix
-    fprintf('>This function was written for linux system only.\n If you really want to use a different system you can upgrade the script replacing\n the linux system function "locate" (in the nasted functions: load_atlas_vector\n and load_atlas_roi)  with an equivalent one for your system.\n');
-    return    
 end
 %--------------------------------------------------------------------------
 %--------------------------------------------------------------------------
@@ -88,78 +82,53 @@ if nargin == 0
     return
 end
 
-if nargin < 2 || isempty(atlas_selector)
-    
+if nargin < 2 || isempty(atlas_selector)   
     atlas_selector = 1:1:8;
-
 end
 
 if nargin < 3 || isempty(thr_or_res)
-    
+    %default values:
     thr = 25;
     resolution = '2mm';  %you can also put '1mm' but the result will be almost the same but much more time demanding
-    
 elseif ischar(thr_or_res)
-    
     if strcmp(thr_or_res,'1mm') || strcmp(thr_or_res,'2mm')
-    
         resolution = thr_or_res;
-        
     else
-        disp('>No valid resolution. Please enter the string 1mm or 2mm.')
+        disp('>No valid resolution. Please enter the string ''1mm'' or ''2mm''.')
         return
     end
-    
 else
-    
     if thr_or_res == 0 || thr_or_res == 25 || thr_or_res == 50
-    
         thr = thr_or_res;
-       
     else
         disp('>No valid threshold. Please enter one of the following values: 0, 25, 50.')
         return
     end    
-    
 end
 
 if ischar(roi) || (~ischar(roi) && numel(roi) ~= 3)
-    
     if nargin >= 3
-        
         if ischar(thr_or_res)
             disp('>In roi modality the third input must be a scalar (0, 20 or 50) not a string.')
             return
         end
-        
     end
-    
 elseif ~ischar(roi) && numel(roi) == 3
-    
     if nargin >= 3
-        
         if ~ischar(thr_or_res)
            disp('>In vector modality the third input must be a string (1mm or 2mm).')
            return
         end
-        
     end
-    
 end
 
-
 if ischar(roi)
-    
     if isempty(dir(roi))
-        
         disp('>The input roi is not in the current or specified path.')
         return
-        
     end
-    
     roi = load_nii(roi);
     roi = uint8(roi.img);
-    
 end
 %--------------------------------------------------------------------------
 %--------------------------------------------------------------------------
@@ -175,54 +144,27 @@ print_info.vector.resolution = [];
 %--------------------------------------------------------------------------
 %                       BODY 
 %--------------------------------------------------------------------------
-if  numel(roi) == 3 % è stato inserito un vettore mni non una roi
-        
+if  numel(roi) == 3 % the input is a vector (not an ROI) i.e., VECT mode
     print_info.modality = 'vec';
     print_info.vector.resolution = resolution;
     
     if isempty(roi2atlas_vector_check_input) || (~isempty(roi2atlas_vector_check_input) && (~strcmp(roi2atlas_vector_check_input.resolution,resolution)))
-        
-       
-        error = load_atlas_vector(resolution);  
-        
-        if error == 1
-            return
-        end
-
-        if ~isfield(roi2atlas_atlas_vector_struct,'volume')
-            
-            disp('>No fsl atlases found in your system.');
-            clearvars -global roi2atlas_vector_check_input roi2atlas_vector_check_input
-            return
-        
-        end
-        
+        load_atlas_vector(resolution);  
     end
-
     
     choosen_atlas_struct = select_atlas_vector(atlas_selector);
-
     [xyz_cord] = mni2xyz(roi,str2double(resolution(1)));
-    
     output_struct = vector_process(xyz_cord,choosen_atlas_struct);
     
-elseif ndims(roi) == 3 % è stata inserita una roi
-    
-    
+elseif ndims(roi) == 3 % the input is a ROI i.e., ROI mode
     %-------check roi resolution----------------   
     if sum(size(roi) == [91,109,91]) == 3
-        
         resolution = '2mm';
-        
     elseif sum(size(roi) == [182,218,182]) == 3
-        
         resolution = '1mm';
-        
     else
-
         disp('>The size of you ROI is not compatible with the geometry of fsl.\nCompatible geometries are [91,109,91] and [182,218,182].');
         return
-
     end
     %-------------------------------------------
     
@@ -230,30 +172,22 @@ elseif ndims(roi) == 3 % è stata inserita una roi
     print_info.roi.thr = thr;
     
     if isempty(roi2atlas_roi_check_input) || (~isempty(roi2atlas_roi_check_input) && (roi2atlas_roi_check_input.thr ~= thr || ~strcmp(roi2atlas_roi_check_input.resolution,resolution)))
-               
-        error = load_atlas_roi(thr,resolution);
-        
-        if error == 1
+        ERR = load_atlas_roi(thr,resolution);
+        if ERR == 1
             return
         end
-        
         if ~isfield(roi2atlas_atlas_roi_struct,'volume')
-            
             disp('>No fsl atlases found in your system');
             clearvars -global roi2atlas_roi_check_input roi2atlas_roi_check_input
             return
-        
         end
         
     end
         
     choosen_atlas_struct = select_atlas_roi(atlas_selector);
-    
     output_struct = roi_process(roi,choosen_atlas_struct);
-    
 else
-   
-    disp('>The first input is neither a roi neither a MNI position.')
+    disp('>The first input is neither a roi nor a MNI position.')
     return
     
 end
@@ -266,13 +200,9 @@ end
 %                       PRINT/OUTPUT
 %--------------------------------------------------------------------------
 if nargout == 1
-    
     atlas = prepare_output(output_struct);      %no stout
-  
 else
-    
     print_labels(output_struct,print_info)  %no variable storage, yes stout
-    
 end
 %--------------------------------------------------------------------------
 %--------------------------------------------------------------------------
@@ -287,11 +217,11 @@ end
 %           ROI FUNCTIONS
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [error] = load_atlas_roi(thr,resolution)
+function [ERR] = load_atlas_roi(thr,resolution)
 
 global roi2atlas_atlas_roi_struct roi2atlas_roi_check_input
 
-error =0;
+ERR =0;
 
 roi2atlas_atlas_roi_struct(1).private_name = ['Juelich-maxprob-thr',num2str(thr),'-',resolution,'.nii.gz'];
 %roi2atlas_atlas_roi_struct(2).private_name = ['HarvardOxford-cortl-maxprob-thr',num2str(thr),'-',resolution,'.nii.gz'];
@@ -348,7 +278,7 @@ for i=1:length(roi2atlas_atlas_roi_struct)
         catch
             fprintf('>Seems you have an old version of NifTI/ANALYZE tool that is not able to open .gz file.\n You can download the last version from:\n http://research.baycrest.org/~jimmy/NIfTI/\n');
             close(h)
-            error = 1;
+            ERR = 1;
             return
         end
         
@@ -471,20 +401,21 @@ end
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [error] = load_atlas_vector(resolution)
+function load_atlas_vector(resolution)
 
 global roi2atlas_atlas_vector_struct roi2atlas_vector_check_input
 
-error = 0;
-
-roi2atlas_atlas_vector_struct(1).private_name = ['Juelich-prob-',resolution,'.nii.gz'];
-roi2atlas_atlas_vector_struct(2).private_name = ['HarvardOxford-cortl-prob-',resolution,'.nii.gz'];
-roi2atlas_atlas_vector_struct(3).private_name = ['HarvardOxford-sub-prob-',resolution,'.nii.gz '];
-roi2atlas_atlas_vector_struct(4).private_name = ['JHU-ICBM-labels-',resolution,'.nii.gz'];
-roi2atlas_atlas_vector_struct(5).private_name = ['JHU-ICBM-tracts-prob-',resolution,'.nii.gz'];
-roi2atlas_atlas_vector_struct(6).private_name = ['Thalamus-prob-',resolution,'.nii.gz'];
-roi2atlas_atlas_vector_struct(7).private_name = ['Cerebellum-MNIflirt-prob-',resolution,'.nii.gz'];
-roi2atlas_atlas_vector_struct(8).private_name = ['Cerebellum-MNIfnirt-prob-',resolution,'.nii.gz'];
+ST = dbstack('-completenames');
+[p,~,~] = fileparts(ST(end-1).file);
+base_path = [p,'/atlases/'];
+roi2atlas_atlas_vector_struct(1).path = [base_path,'Juelich/Juelich-prob-',resolution,'.nii.gz'];
+roi2atlas_atlas_vector_struct(2).path = [base_path,'HarvardOxford/HarvardOxford-cort-prob-',resolution,'.nii.gz'];
+roi2atlas_atlas_vector_struct(3).path = [base_path,'HarvardOxford/HarvardOxford-sub-prob-',resolution,'.nii.gz'];
+roi2atlas_atlas_vector_struct(4).path = [base_path,'JHU/JHU-ICBM-labels-',resolution,'.nii.gz'];
+roi2atlas_atlas_vector_struct(5).path = [base_path,'JHU/JHU-ICBM-tracts-prob-',resolution,'.nii.gz'];
+roi2atlas_atlas_vector_struct(6).path = [base_path,'Thalamus/Thalamus-prob-',resolution,'.nii.gz'];
+roi2atlas_atlas_vector_struct(7).path = [base_path,'Cerebellum/Cerebellum-MNIflirt-prob-',resolution,'.nii.gz'];
+roi2atlas_atlas_vector_struct(8).path = [base_path,'Cerebellum/Cerebellum-MNIfnirt-prob-',resolution,'.nii.gz'];
 %roi2atlas_atlas_vector_struct(9).private_name = ['Talairach-labels-',resolution,'.nii.gz'];
 
 
@@ -498,64 +429,30 @@ roi2atlas_atlas_vector_struct(7).name = 'Cerebellar Atlas in MNI152 after FLIRT'
 roi2atlas_atlas_vector_struct(8).name = 'Cerebellar Atlas in MNI152 after FNIRT';
 %roi2atlas_atlas_vector_struct(9).name = 'Talairach Daemon Atlas';
 
-roi2atlas_atlas_vector_struct(1).xml_name = 'Juelich.xml';
-roi2atlas_atlas_vector_struct(2).xml_name = 'HarvardOxford-Cortical-Lateralized.xml';
-roi2atlas_atlas_vector_struct(3).xml_name = 'HarvardOxford-Subcortical.xml';
-roi2atlas_atlas_vector_struct(4).xml_name = 'JHU-labels.xml';
-roi2atlas_atlas_vector_struct(5).xml_name = 'JHU-tracts.xml';
-roi2atlas_atlas_vector_struct(6).xml_name = 'Thalamus.xml';
-roi2atlas_atlas_vector_struct(7).xml_name = 'Cerebellum_MNIflirt.xml';
-roi2atlas_atlas_vector_struct(8).xml_name = 'Cerebellum_MNIfnirt.xml';
+roi2atlas_atlas_vector_struct(1).xml_path = [base_path,'Juelich.xml'];
+roi2atlas_atlas_vector_struct(2).xml_path = [base_path,'HarvardOxford-Cortical.xml'];
+roi2atlas_atlas_vector_struct(3).xml_path = [base_path,'HarvardOxford-Subcortical.xml'];
+roi2atlas_atlas_vector_struct(4).xml_path = [base_path,'JHU-labels.xml'];
+roi2atlas_atlas_vector_struct(5).xml_path = [base_path,'JHU-tracts.xml'];
+roi2atlas_atlas_vector_struct(6).xml_path = [base_path,'Thalamus.xml'];
+roi2atlas_atlas_vector_struct(7).xml_path = [base_path,'Cerebellum_MNIflirt.xml'];
+roi2atlas_atlas_vector_struct(8).xml_path = [base_path,'Cerebellum_MNIfnirt.xml'];
 %roi2atlas_atlas_vector_struct(9).xml_name = 'Talairach.xml';
 
 tot_step = length(roi2atlas_atlas_vector_struct);
 h = waitbar(0,'Loading atlases, be patient...');
 
-for i=1:length(roi2atlas_atlas_vector_struct)
+for l=1:length(roi2atlas_atlas_vector_struct)
     
-    waitbar(i/tot_step);
+    waitbar(l/tot_step);
     
-    [null,result] = system(['locate ',roi2atlas_atlas_vector_struct(i).private_name]);
+    tmp = load_nii(roi2atlas_atlas_vector_struct(l).path);
     
-    if isempty(result)
-        
-        warning(['Can not find atlas: ',roi2atlas_atlas_vector_struct(i).private_name]);
-        
-    else
+    roi2atlas_atlas_vector_struct(l).volume = tmp.img;
     
-        path = result(1:(strfind(result,'.nii.gz') + 6));
-    
-        try
-            tmp = load_nii(path);
-        catch
-            fprintf('>Seems you have an old version of NifTI/ANALYZE tool that is not able to open .gz file\n You can download the last version from:\n http://research.baycrest.org/~jimmy/NIfTI/\n');
-            close(h)
-            error = 1;
-            return
-        end
-        
-        roi2atlas_atlas_vector_struct(i).volume = tmp.img;
-    
-       
-    
-        [null,result] = system(['locate ',roi2atlas_atlas_vector_struct(i).xml_name]);
-        
-        if isempty(result)
-            
-            warning(['Can not find atlas labels: ',roi2atlas_atlas_vector_struct(i).xml_name]);
-            
-        else
+    xDoc =xmlread(roi2atlas_atlas_vector_struct(l).xml_path);
 
-            path = result(1:(strfind(result,'.xml') + 3));
-
-            xDoc =xmlread(path);
-
-            roi2atlas_atlas_vector_struct(i).xml_loaded = xmlwrite(xDoc);
-            
-        end
-    
-    
-    end
+    roi2atlas_atlas_vector_struct(l).xml_loaded = xmlwrite(xDoc);
 
 end
 
@@ -573,13 +470,9 @@ global roi2atlas_atlas_vector_struct
 a=roi2atlas_atlas_vector_struct;
 
 for i = length(a):-1:1
-    
-    if sum(i==atlas_selector) == 0
-        
-        a(i) = [];
-                
+    if sum(i==atlas_selector) == 0  
+        a(i) = [];      
     end
-    
 end
 
 return
@@ -589,7 +482,6 @@ function [a] = vector_process(xyz,a)
 
 for i=1:length(a)
     
-     
     temp = a(i).volume(xyz(1),xyz(2),xyz(3),:);
     
     temp =squeeze(temp);
@@ -597,13 +489,9 @@ for i=1:length(a)
     a(i).label = [];   
     
     if sum(temp) == 0
-        
         continue 
-        
     else
-        
         count = 0;
-        
         [temp_sort,temp_index] = sort(temp,'descend');
         
         for j=1:length(temp)
@@ -623,7 +511,6 @@ for i=1:length(a)
 
             a(i).label{count} = [num2str(temp_sort(j),'%2.0f'),'% ',tmp(tmp_inf(1) +1 :tmp_sup(1) - 1)];
                 
-            
         end
     end
 end
@@ -647,7 +534,7 @@ elseif vs == 1
 
 end
 
-xyz(1)=origin(1) + mni(1)/vs +1;      %original was origin(1) - mni(1)/vs
+xyz(1)=origin(1) + mni(1)/vs +1;      %was origin(1) - mni(1)/vs
 xyz(2)=mni(2)/vs + origin(2) +1;
 xyz(3)=mni(3)/vs + origin(3) +1;
             
@@ -663,14 +550,11 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [output] = prepare_output(a)
-
 output = [];
 
 for i=1:length(a)
-    
     output(i).name = a(i).name;
     output(i).label = a(i).label;
-
 end
 
 return
@@ -678,51 +562,39 @@ end
 
 function print_labels(a,b)
 
-fprintf('_________________________________');
-fprintf('\nMNI2ATLAS');
-fprintf('\n>modality:\t\t');
+fprintf('___________________________________________');
+fprintf('\n\t\tMNI2ATLAS');
+fprintf('\n> Modality:\t\t');
 if strcmp(b.modality,'vec')
     fprintf('vector');
-    fprintf('\n>resolution:\t\t%s',b.vector.resolution)
+    fprintf('\n> Resolution:\t\t%s',b.vector.resolution)
 else
     fprintf('roi');
-    fprintf('\n>thrshold:\t\t%d%%',b.roi.thr)
+    fprintf('\n> Thrshold:\t\t%d%%',b.roi.thr)
 end
-fprintf('\n>atlas selected:\t%d\n',length(b.atlas_selector))
-fprintf('_________________________________\n');
+fprintf('\n> Mumber of atlases:\t%d\n',length(b.atlas_selector))
+fprintf('___________________________________________\n');
 total_label_found = 0;
 
 for i=1:length(a)
-    
     if ~isempty(a(i).label)
-        
         total_label_found = total_label_found + 1;
-        
     end
-    
 end
 
 if total_label_found == 0
-    
-    fprintf('\n>No labels found \n');
+    fprintf('\n> No labels found \n');
 else
-    fprintf('\n>Found labels in %d atlases:\n',total_label_found);
+    fprintf('\n> Labels found in %d atlas(es):\n',total_label_found);
 end
 
 for i=1:length(a)
-    
     if ~isempty(a(i).label) 
-          
         fprintf('\n%s',a(i).name)
-        
         for j=1:length(a(i).label)
-        
             fprintf('\n\t%s',a(i).label{j})
-            
         end
-        
         fprintf('\n');
-        
     end
 end
         

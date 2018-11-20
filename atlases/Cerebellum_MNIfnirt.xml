@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<atlas version="1.0">
+  <header>
+    <name>Cerebellar Atlas in MNI152 space after normalization with FNIRT</name>
+    <shortname>Cerebellum_MNI_fnirt</shortname>
+    <type>Probabilistic</type>
+    <images>
+      <imagefile>/Cerebellum/Cerebellum-MNIfnirt-prob-1mm</imagefile>
+      <summaryimagefile>/Cerebellum/Cerebellum-MNIfnirt-maxprob-thr25-1mm</summaryimagefile>
+    </images>
+    <images>
+      <imagefile>/Cerebellum/Cerebellum-MNIfnirt-prob-2mm</imagefile>
+      <summaryimagefile>/Cerebellum/Cerebellum-MNIfnirt-maxprob-thr25-2mm</summaryimagefile>
+    </images>
+  </header>
+  <data>
+<label index="0" x="96" y="81" z="55">Left I-IV</label>
+<label index="1" x="84" y="80" z="56">Right I-IV</label>
+<label index="2" x="107" y="78" z="52">Left V</label>
+<label index="3" x="73" y="77" z="52">Right V</label>
+<label index="4" x="104" y="58" z="51">Left VI</label>
+<label index="5" x="90" y="53" z="51">Vermis VI</label>
+<label index="6" x="69" y="61" z="49">Right VI</label>
+<label index="7" x="129" y="55" z="41">Left Crus I</label>
+<label index="8" x="94" y="48" z="46">Vermis Crus I</label>
+<label index="9" x="49" y="55" z="41">Right Crus I</label>
+<label index="10" x="102" y="45" z="33">Left Crus II</label>
+<label index="11" x="89" y="52" z="40">Vermis Crus II</label>
+<label index="12" x="70" y="46" z="31">Right Crus II</label>
+<label index="13" x="128" y="68" z="18">Left VIIb</label>
+<label index="14" x="89" y="57" z="41">Vermis VIIb</label>
+<label index="15" x="60" y="56" z="19">Right VIIb</label>
+<label index="16" x="119" y="72" z="18">Left VIIIa</label>
+<label index="17" x="89" y="56" z="30">Vermis VIIIa</label>
+<label index="18" x="64" y="64" z="17">Right VIIIa</label>
+<label index="19" x="108" y="74" z="17">Left VIIIb</label>
+<label index="20" x="90" y="61" z="27">Vermis VIIIb</label>
+<label index="21" x="71" y="73" z="17">Right VIIIb</label>
+<label index="22" x="96" y="70" z="21">Left IX</label>
+<label index="23" x="90" y="71" z="36">Vermis IX</label>
+<label index="24" x="84" y="71" z="20">Right IX</label>
+<label index="25" x="111" y="91" z="26">Left X</label>
+<label index="26" x="90" y="78" z="37">Vermis X</label>
+<label index="27" x="67" y="90" z="26">Right X</label>
+  </data>
+</atlas>

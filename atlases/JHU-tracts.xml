@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<atlas version="1.0">
+  <header>
+    <name>JHU White-Matter Tractography Atlas</name>
+    <type>Probabilistic</type>
+    <images>
+      <imagefile>/JHU/JHU-ICBM-tracts-prob-1mm</imagefile>
+      <summaryimagefile>/JHU/JHU-ICBM-tracts-maxprob-thr25-1mm</summaryimagefile>
+    </images>
+    <images>
+      <imagefile>/JHU/JHU-ICBM-tracts-prob-2mm</imagefile>
+      <summaryimagefile>/JHU/JHU-ICBM-tracts-maxprob-thr25-2mm</summaryimagefile>
+    </images>
+  </header>
+  <data>
+<label index="0" x="98" y="117" z="75">Anterior thalamic radiation L</label>
+<label index="1" x="83" y="117" z="76">Anterior thalamic radiation R</label>
+<label index="2" x="96" y="99" z="36">Corticospinal tract L</label>
+<label index="3" x="69" y="98" z="130">Corticospinal tract R</label>
+<label index="4" x="99" y="156" z="90">Cingulum (cingulate gyrus) L</label>
+<label index="5" x="80" y="89" z="104">Cingulum (cingulate gyrus) R</label>
+<label index="6" x="115" y="106" z="46">Cingulum (hippocampus) L</label>
+<label index="7" x="65" y="111" z="43">Cingulum (hippocampus) R</label>
+<label index="8" x="62" y="69" z="85">Forceps major</label>
+<label index="9" x="89" y="153" z="79">Forceps minor</label>
+<label index="10" x="118" y="54" z="70">Inferior fronto-occipital fasciculus L</label>
+<label index="11" x="61" y="164" z="75">Inferior fronto-occipital fasciculus R</label>
+<label index="12" x="120" y="57" z="69">Inferior longitudinal fasciculus L</label>
+<label index="13" x="59" y="57" z="69">Inferior longitudinal fasciculus R</label>
+<label index="14" x="129" y="112" z="102">Superior longitudinal fasciculus L</label>
+<label index="15" x="40" y="121" z="99">Superior longitudinal fasciculus R</label>
+<label index="16" x="129" y="125" z="52">Uncinate fasciculus L</label>
+<label index="17" x="63" y="139" z="65">Uncinate fasciculus R</label>
+<label index="18" x="140" y="89" z="61">Superior longitudinal fasciculus (temporal part) L</label>
+<label index="19" x="52" y="116" z="103">Superior longitudinal fasciculus (temporal part) R</label>
+  </data>
+</atlas>
+
