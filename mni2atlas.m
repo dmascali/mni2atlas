@@ -1,6 +1,6 @@
 function [atlas]=mni2atlas(roi,atlas_selector,thr_or_res)
 %MNI2ATLAS: takes in input a ROI or a vector of coordinates (both in the MNI
-%space) and returns labels from different fsl atlases.
+%space) and returns labels from different FSL atlases.
 %
 %In VECTOR modality labels are returned in probability values (same results
 %of fsl atlas tool).
@@ -48,13 +48,13 @@ function [atlas]=mni2atlas(roi,atlas_selector,thr_or_res)
 %   Option available only under VECTOR modality.
 %__________________________________________________________________________
 %SYSTEM REQUIREMENTS
-%   1) run only on linux system
-%   2) NifTI and ANALYZE tool (version > 2012-10-12)
-%   3) fsl atlases
+%   1) NifTI and ANALYZE tool (version > 2012-10-12)
 %__________________________________________________________________________
 %
-%   Version 1.0
-%   Last modified 11/10/2013
+% First version: 2013      
+% Author:
+%   Daniele Mascali
+%   Enrico Fermi Center, MARBILab, Rome
 %   danielemascali@gmail.com
 
 %end of help
@@ -172,20 +172,12 @@ elseif ndims(roi) == 3 % the input is a ROI i.e., ROI mode
     print_info.roi.thr = thr;
     
     if isempty(roi2atlas_roi_check_input) || (~isempty(roi2atlas_roi_check_input) && (roi2atlas_roi_check_input.thr ~= thr || ~strcmp(roi2atlas_roi_check_input.resolution,resolution)))
-        ERR = load_atlas_roi(thr,resolution);
-        if ERR == 1
-            return
-        end
-        if ~isfield(roi2atlas_atlas_roi_struct,'volume')
-            disp('>No fsl atlases found in your system');
-            clearvars -global roi2atlas_roi_check_input roi2atlas_roi_check_input
-            return
-        end
-        
+        load_atlas_roi(thr,resolution);
     end
         
     choosen_atlas_struct = select_atlas_roi(atlas_selector);
     output_struct = roi_process(roi,choosen_atlas_struct);
+    
 else
     disp('>The first input is neither a roi nor a MNI position.')
     return
@@ -217,23 +209,22 @@ end
 %           ROI FUNCTIONS
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [ERR] = load_atlas_roi(thr,resolution)
+function load_atlas_roi(thr,resolution)
 
 global roi2atlas_atlas_roi_struct roi2atlas_roi_check_input
 
-ERR =0;
-
-roi2atlas_atlas_roi_struct(1).private_name = ['Juelich-maxprob-thr',num2str(thr),'-',resolution,'.nii.gz'];
-%roi2atlas_atlas_roi_struct(2).private_name = ['HarvardOxford-cortl-maxprob-thr',num2str(thr),'-',resolution,'.nii.gz'];
-roi2atlas_atlas_roi_struct(2).private_name = ['HarvardOxford-cort-maxprob-thr',num2str(thr),'-',resolution,'.nii.gz'];
-roi2atlas_atlas_roi_struct(3).private_name = ['HarvardOxford-sub-maxprob-thr',num2str(thr),'-',resolution,'.nii.gz '];
-roi2atlas_atlas_roi_struct(4).private_name = ['JHU-ICBM-labels-',resolution,'.nii.gz'];
-roi2atlas_atlas_roi_struct(5).private_name = ['JHU-ICBM-tracts-maxprob-thr',num2str(thr),'-',resolution,'.nii.gz'];
-roi2atlas_atlas_roi_struct(6).private_name = ['Thalamus-maxprob-thr',num2str(thr),'-',resolution,'.nii.gz'];
-roi2atlas_atlas_roi_struct(7).private_name = ['Cerebellum-MNIflirt-maxprob-thr',num2str(thr),'-',resolution,'.nii.gz'];
-roi2atlas_atlas_roi_struct(8).private_name = ['Cerebellum-MNIfnirt-maxprob-thr',num2str(thr),'-',resolution,'.nii.gz'];
+ST = dbstack('-completenames');
+[p,~,~] = fileparts(ST(end-1).file);
+base_path = [p,'/atlases/'];
+roi2atlas_atlas_roi_struct(1).path = [base_path,'Juelich/Juelich-maxprob-thr',num2str(thr),'-',resolution,'.nii.gz'];
+roi2atlas_atlas_roi_struct(2).path = [base_path,'HarvardOxford/HarvardOxford-cort-maxprob-thr',num2str(thr),'-',resolution,'.nii.gz'];
+roi2atlas_atlas_roi_struct(3).path = [base_path,'HarvardOxford/HarvardOxford-sub-maxprob-thr',num2str(thr),'-',resolution,'.nii.gz'];
+roi2atlas_atlas_roi_struct(4).path = [base_path,'JHU/JHU-ICBM-labels-',resolution,'.nii.gz'];
+roi2atlas_atlas_roi_struct(5).path = [base_path,'JHU/JHU-ICBM-tracts-maxprob-thr',num2str(thr),'-',resolution,'.nii.gz'];
+roi2atlas_atlas_roi_struct(6).path = [base_path,'Thalamus/Thalamus-maxprob-thr',num2str(thr),'-',resolution,'.nii.gz'];
+roi2atlas_atlas_roi_struct(7).path = [base_path,'Cerebellum/Cerebellum-MNIflirt-maxprob-thr',num2str(thr),'-',resolution,'.nii.gz'];
+roi2atlas_atlas_roi_struct(8).path = [base_path,'Cerebellum/Cerebellum-MNIfnirt-maxprob-thr',num2str(thr),'-',resolution,'.nii.gz'];
 %roi2atlas_atlas_roi_struct(9).private_name = ['Talairach-labels-',resolution,'.nii.gz'];
-
 
 roi2atlas_atlas_roi_struct(1).name = 'Juelich Histological Atlas' ;
 roi2atlas_atlas_roi_struct(2).name = 'Harvard-Oxford Cortical Structural Atlas';
@@ -245,66 +236,31 @@ roi2atlas_atlas_roi_struct(7).name = 'Cerebellar Atlas in MNI152 after FLIRT';
 roi2atlas_atlas_roi_struct(8).name = 'Cerebellar Atlas in MNI152 after FNIRT';
 %roi2atlas_atlas_roi_struct(9).name = 'Talairach Daemon Atlas';
 
-roi2atlas_atlas_roi_struct(1).xml_name = 'Juelich.xml';
-%roi2atlas_atlas_roi_struct(2).xml_name = 'HarvardOxford-Cortical-Lateralized.xml';
-roi2atlas_atlas_roi_struct(2).xml_name = 'HarvardOxford-Cortical.xml';
-roi2atlas_atlas_roi_struct(3).xml_name = 'HarvardOxford-Subcortical.xml';
-roi2atlas_atlas_roi_struct(4).xml_name = 'JHU-labels.xml';
-roi2atlas_atlas_roi_struct(5).xml_name = 'JHU-tracts.xml';
-roi2atlas_atlas_roi_struct(6).xml_name = 'Thalamus.xml';
-roi2atlas_atlas_roi_struct(7).xml_name = 'Cerebellum_MNIflirt.xml';
-roi2atlas_atlas_roi_struct(8).xml_name = 'Cerebellum_MNIfnirt.xml';
+roi2atlas_atlas_roi_struct(1).xml_path = [base_path,'Juelich.xml'];
+roi2atlas_atlas_roi_struct(2).xml_path = [base_path,'HarvardOxford-Cortical.xml'];
+roi2atlas_atlas_roi_struct(3).xml_path = [base_path,'HarvardOxford-Subcortical.xml'];
+roi2atlas_atlas_roi_struct(4).xml_path = [base_path,'JHU-labels.xml'];
+roi2atlas_atlas_roi_struct(5).xml_path = [base_path,'JHU-tracts.xml'];
+roi2atlas_atlas_roi_struct(6).xml_path = [base_path,'Thalamus.xml'];
+roi2atlas_atlas_roi_struct(7).xml_path = [base_path,'Cerebellum_MNIflirt.xml'];
+roi2atlas_atlas_roi_struct(8).xml_path = [base_path,'Cerebellum_MNIfnirt.xml'];
 %roi2atlas_atlas_roi_struct(9).xml_name = 'Talairach.xml';
 
 tot_step = length(roi2atlas_atlas_roi_struct);
-h = waitbar(0,'Loading atlases, be patient...');
+h = waitbar(0,'','name','Loading atlases, be patient...');
 
-for i=1:length(roi2atlas_atlas_roi_struct)
+for l=1:length(roi2atlas_atlas_roi_struct)
     
-    waitbar(i/tot_step);
+    waitbar(l/tot_step,h,roi2atlas_atlas_roi_struct(l).name);
     
-    [null,result] = system(['locate ',roi2atlas_atlas_roi_struct(i).private_name]); % le vecchie versioni di matlab non riconoscono la tilde, ho messo null come varibile di non interesse per non creare problemi di compatibilit�.
+    tmp = load_nii(roi2atlas_atlas_roi_struct(l).path);
     
-    if isempty(result)
-        
-        warning(['Can not find atlas: ',roi2atlas_atlas_roi_struct(i).private_name]);
-        
-    else
+    roi2atlas_atlas_roi_struct(l).volume = tmp.img;
     
-        path = result(1:(strfind(result,'.nii.gz') + 6));
+    xDoc =xmlread(roi2atlas_atlas_roi_struct(l).xml_path);
     
-        try
-            tmp = load_nii(path);
-        catch
-            fprintf('>Seems you have an old version of NifTI/ANALYZE tool that is not able to open .gz file.\n You can download the last version from:\n http://research.baycrest.org/~jimmy/NIfTI/\n');
-            close(h)
-            ERR = 1;
-            return
-        end
-        
+    roi2atlas_atlas_roi_struct(l).xml_loaded = xmlwrite(xDoc);
     
-        roi2atlas_atlas_roi_struct(i).volume = tmp.img;
-    
-       
-    
-        [null,result] = system(['locate ',roi2atlas_atlas_roi_struct(i).xml_name]);
-        
-        if isempty(result)
-            
-            warning(['Can not find atlas labels: ',roi2atlas_atlas_roi_struct(i).xml_name]);
-            
-        else
-
-            path = result(1:(strfind(result,'.xml') + 3));
-
-            xDoc =xmlread(path);
-
-            roi2atlas_atlas_roi_struct(i).xml_loaded = xmlwrite(xDoc);
-            
-        end
-    
-    
-    end
 end
 
 close(h);
@@ -418,7 +374,6 @@ roi2atlas_atlas_vector_struct(7).path = [base_path,'Cerebellum/Cerebellum-MNIfli
 roi2atlas_atlas_vector_struct(8).path = [base_path,'Cerebellum/Cerebellum-MNIfnirt-prob-',resolution,'.nii.gz'];
 %roi2atlas_atlas_vector_struct(9).private_name = ['Talairach-labels-',resolution,'.nii.gz'];
 
-
 roi2atlas_atlas_vector_struct(1).name = 'Juelich Histological Atlas' ;
 roi2atlas_atlas_vector_struct(2).name = 'Harvard-Oxford Cortical Structural Atlas';
 roi2atlas_atlas_vector_struct(3).name = 'Harvard-Oxford Subcortical Structural Atlas';
@@ -440,11 +395,11 @@ roi2atlas_atlas_vector_struct(8).xml_path = [base_path,'Cerebellum_MNIfnirt.xml'
 %roi2atlas_atlas_vector_struct(9).xml_name = 'Talairach.xml';
 
 tot_step = length(roi2atlas_atlas_vector_struct);
-h = waitbar(0,'Loading atlases, be patient...');
+h = waitbar(0,'','name','Loading atlases, be patient...');
 
 for l=1:length(roi2atlas_atlas_vector_struct)
     
-    waitbar(l/tot_step);
+    waitbar(l/tot_step,h,roi2atlas_atlas_vector_struct(l).name);
     
     tmp = load_nii(roi2atlas_atlas_vector_struct(l).path);
     
