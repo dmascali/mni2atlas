@@ -6,7 +6,7 @@ function [atlas]=mni2atlas(roi,atlas_selector,thr_or_res)
 %of fsl atlas tool).
 %In ROI modality the probability value reported for a label represents the
 %frequency of that label in the roi for a given threshold of fsl atlas
-%probability map.
+%probability map (0%, 25% or 50%; default = 25%).
 %__________________________________________________________________________
 %HOW TO USE
 %   MNI2ATLAS(VECTOR/ROI) the first input can be a MNI vector or a ROI in
@@ -14,7 +14,7 @@ function [atlas]=mni2atlas(roi,atlas_selector,thr_or_res)
 %   different work modalities. With no other input the script will seek labels
 %   among all accesible fsl atalses.
 %
-%   MNI2ATLAS(VECTOR/ROI,ATLAS_SELECTOR) allow to choose between the 
+%   MNI2ATLAS(VECTOR/ROI,ATLAS_SELECTOR) allow to choose among the 
 %   following atales:
 %       1) Juelich Histological Atlas
 %       2) Harvard-Oxford Cortical Structural Atlas
@@ -24,8 +24,9 @@ function [atlas]=mni2atlas(roi,atlas_selector,thr_or_res)
 %       6) Oxford Thalamic Connectivity Atlas
 %       7) Cerebellar Atlas in MNI152 after FLIRT
 %       8) Cerebellar Atlas in MNI152 after FNIRT
+%       9) MNI Structural Atlas
 %   ATLAS_SELECTOR must be a raw vector (i.e. [1,3,6]). Default value is
-%   [1:1:8]. You can also leave it as an empty vector (i.e. (VECTOR/ROI,[])).
+%   [1:1:9]. You can also leave it as an empty vector (i.e. (VECTOR/ROI,[])).
 %
 %   [ATLAS]=MNI2ATLAS(VECTOR/ROI,...) the script returns the structure          
 %   ATLAS whit the following fields: .name (of the atlas), .labels (a cell
@@ -35,7 +36,7 @@ function [atlas]=mni2atlas(roi,atlas_selector,thr_or_res)
 %   position.
 %
 %   MNI2ATLAS(ROI) prints on screen labels found for the input ROI. ROI can 
-%   be a preloaded (with load_nii) volume or the path of a nii volume. 
+%   be a preloaded (with load_nii) volume or the path of a nifti volume. 
 %
 %ADVANCED OPTIONS
 %   MNI2ATLAS(ROI,ATLAS_SELECTOR,THR) THR allows to choose among three 
@@ -48,7 +49,11 @@ function [atlas]=mni2atlas(roi,atlas_selector,thr_or_res)
 %   Option available only under VECTOR modality.
 %__________________________________________________________________________
 %SYSTEM REQUIREMENTS
-%   1) NifTI and ANALYZE tool (version > 2012-10-12)
+%  NifTI and ANALYZE tool (version > 2012-10-12)
+%__________________________________________________________________________
+%ACKNOWLEDGEMENTS
+%  This function ueses some of the available FSL atlases:
+%  https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Atlases
 %__________________________________________________________________________
 %
 % First version: 2013      
@@ -83,7 +88,7 @@ if nargin == 0
 end
 
 if nargin < 2 || isempty(atlas_selector)   
-    atlas_selector = 1:1:8;
+    atlas_selector = 1:1:9;
 end
 
 if nargin < 3 || isempty(thr_or_res)
@@ -224,7 +229,7 @@ roi2atlas_atlas_roi_struct(5).path = [base_path,'JHU/JHU-ICBM-tracts-maxprob-thr
 roi2atlas_atlas_roi_struct(6).path = [base_path,'Thalamus/Thalamus-maxprob-thr',num2str(thr),'-',resolution,'.nii.gz'];
 roi2atlas_atlas_roi_struct(7).path = [base_path,'Cerebellum/Cerebellum-MNIflirt-maxprob-thr',num2str(thr),'-',resolution,'.nii.gz'];
 roi2atlas_atlas_roi_struct(8).path = [base_path,'Cerebellum/Cerebellum-MNIfnirt-maxprob-thr',num2str(thr),'-',resolution,'.nii.gz'];
-%roi2atlas_atlas_roi_struct(9).private_name = ['Talairach-labels-',resolution,'.nii.gz'];
+roi2atlas_atlas_roi_struct(9).path = [base_path,'MNI/MNI-maxprob-thr',num2str(thr),'-',resolution,'.nii.gz'];
 
 roi2atlas_atlas_roi_struct(1).name = 'Juelich Histological Atlas' ;
 roi2atlas_atlas_roi_struct(2).name = 'Harvard-Oxford Cortical Structural Atlas';
@@ -234,7 +239,7 @@ roi2atlas_atlas_roi_struct(5).name = 'JHU White Matter tractography Atlas';
 roi2atlas_atlas_roi_struct(6).name = 'Oxford Thalamic Connectivity Atlas';
 roi2atlas_atlas_roi_struct(7).name = 'Cerebellar Atlas in MNI152 after FLIRT';
 roi2atlas_atlas_roi_struct(8).name = 'Cerebellar Atlas in MNI152 after FNIRT';
-%roi2atlas_atlas_roi_struct(9).name = 'Talairach Daemon Atlas';
+roi2atlas_atlas_roi_struct(9).name = 'MNI Structural Atlas';
 
 roi2atlas_atlas_roi_struct(1).xml_path = [base_path,'Juelich.xml'];
 roi2atlas_atlas_roi_struct(2).xml_path = [base_path,'HarvardOxford-Cortical.xml'];
@@ -244,7 +249,7 @@ roi2atlas_atlas_roi_struct(5).xml_path = [base_path,'JHU-tracts.xml'];
 roi2atlas_atlas_roi_struct(6).xml_path = [base_path,'Thalamus.xml'];
 roi2atlas_atlas_roi_struct(7).xml_path = [base_path,'Cerebellum_MNIflirt.xml'];
 roi2atlas_atlas_roi_struct(8).xml_path = [base_path,'Cerebellum_MNIfnirt.xml'];
-%roi2atlas_atlas_roi_struct(9).xml_name = 'Talairach.xml';
+roi2atlas_atlas_roi_struct(9).xml_path = [base_path,'MNI.xml'];
 
 tot_step = length(roi2atlas_atlas_roi_struct);
 h = waitbar(0,'','name','Loading atlases, be patient...');
@@ -372,7 +377,7 @@ roi2atlas_atlas_vector_struct(5).path = [base_path,'JHU/JHU-ICBM-tracts-prob-',r
 roi2atlas_atlas_vector_struct(6).path = [base_path,'Thalamus/Thalamus-prob-',resolution,'.nii.gz'];
 roi2atlas_atlas_vector_struct(7).path = [base_path,'Cerebellum/Cerebellum-MNIflirt-prob-',resolution,'.nii.gz'];
 roi2atlas_atlas_vector_struct(8).path = [base_path,'Cerebellum/Cerebellum-MNIfnirt-prob-',resolution,'.nii.gz'];
-%roi2atlas_atlas_vector_struct(9).private_name = ['Talairach-labels-',resolution,'.nii.gz'];
+roi2atlas_atlas_vector_struct(9).path = [base_path,'MNI/MNI-prob-',resolution,'.nii.gz'];
 
 roi2atlas_atlas_vector_struct(1).name = 'Juelich Histological Atlas' ;
 roi2atlas_atlas_vector_struct(2).name = 'Harvard-Oxford Cortical Structural Atlas';
@@ -382,7 +387,7 @@ roi2atlas_atlas_vector_struct(5).name = 'JHU White Matter tractography Atlas';
 roi2atlas_atlas_vector_struct(6).name = 'Oxford Thalamic Connectivity Atlas';
 roi2atlas_atlas_vector_struct(7).name = 'Cerebellar Atlas in MNI152 after FLIRT';
 roi2atlas_atlas_vector_struct(8).name = 'Cerebellar Atlas in MNI152 after FNIRT';
-%roi2atlas_atlas_vector_struct(9).name = 'Talairach Daemon Atlas';
+roi2atlas_atlas_vector_struct(9).name = 'MNI Structural Atlas';
 
 roi2atlas_atlas_vector_struct(1).xml_path = [base_path,'Juelich.xml'];
 roi2atlas_atlas_vector_struct(2).xml_path = [base_path,'HarvardOxford-Cortical.xml'];
@@ -392,7 +397,7 @@ roi2atlas_atlas_vector_struct(5).xml_path = [base_path,'JHU-tracts.xml'];
 roi2atlas_atlas_vector_struct(6).xml_path = [base_path,'Thalamus.xml'];
 roi2atlas_atlas_vector_struct(7).xml_path = [base_path,'Cerebellum_MNIflirt.xml'];
 roi2atlas_atlas_vector_struct(8).xml_path = [base_path,'Cerebellum_MNIfnirt.xml'];
-%roi2atlas_atlas_vector_struct(9).xml_name = 'Talairach.xml';
+roi2atlas_atlas_vector_struct(9).xml_path = [base_path,'MNI.xml'];
 
 tot_step = length(roi2atlas_atlas_vector_struct);
 h = waitbar(0,'','name','Loading atlases, be patient...');
