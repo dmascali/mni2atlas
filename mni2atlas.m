@@ -10,12 +10,12 @@ function [atlas]=mni2atlas(roi,atlas_selector,thr_or_res)
 %__________________________________________________________________________
 %HOW TO USE
 %   MNI2ATLAS(VECTOR/ROI) the first input can be a MNI vector or a ROI in
-%   the MNI space. Depending on the input the script switch between two
+%   the MNI space. Depending on the input the script switches between two
 %   different work modalities. With no other input the script will seek labels
-%   among all accesible fsl atalses.
+%   among the available fsl atalses.
 %
-%   MNI2ATLAS(VECTOR/ROI,ATLAS_SELECTOR) allow to choose among the 
-%   following atales:
+%   MNI2ATLAS(VECTOR/ROI,ATLAS_SELECTOR) allows to choose among the 
+%   following atlases:
 %       1) Juelich Histological Atlas
 %       2) Harvard-Oxford Cortical Structural Atlas
 %       3) Harvard-Oxford Subcortical Structural Atlas
@@ -25,34 +25,35 @@ function [atlas]=mni2atlas(roi,atlas_selector,thr_or_res)
 %       7) Cerebellar Atlas in MNI152 after FLIRT
 %       8) Cerebellar Atlas in MNI152 after FNIRT
 %       9) MNI Structural Atlas
-%   ATLAS_SELECTOR must be a raw vector (i.e. [1,3,6]). Default value is
-%   [1:1:9]. You can also leave it as an empty vector (i.e. (VECTOR/ROI,[])).
+%   ATLAS_SELECTOR must be a row vector (i.e. [1,3,6]). Default value is
+%   [1:1:9]. You can also leave it as an empty vector (i.e., (VECTOR/ROI,[])).
 %
 %   [ATLAS]=MNI2ATLAS(VECTOR/ROI,...) the script returns the structure          
 %   ATLAS whit the following fields: .name (of the atlas), .labels (a cell
-%   vector). No stout will be print.
+%   vector). No stdout will be print.
 %
-%   MNI2ATLAS(VECTOR) prints on screen labels found for the mni VECTOR
+%   MNI2ATLAS(VECTOR) prints on screen labels found for the MNI VECTOR
 %   position.
 %
 %   MNI2ATLAS(ROI) prints on screen labels found for the input ROI. ROI can 
 %   be a preloaded (with load_nii) volume or the path of a nifti volume. 
 %
 %ADVANCED OPTIONS
-%   MNI2ATLAS(ROI,ATLAS_SELECTOR,THR) THR allows to choose among three 
-%   different threshold levels: 0, 25, 50 (e.i. 0%, 25%, 50%). Default
+%   MNI2ATLAS(ROI,ATLAS_SELECTOR,THR) THR allows to choose among 3 threshold
+%   levels: 0, 25, 50 (i.e., 0%, 25%, 50%). Default
 %   value is 25. Option available only under ROI modality.
 %
 %   MNI2ATLAS(VECTOR,ATLAS_SELECTOR,RESOLUTION) RESOLUTION allows to
-%   choose between 1mm or 2mm atlases. 1mm atlases performe better regions
-%   identification but requires more loading time. Default value is 2mm.
+%   choose between '1mm' or '2mm' atlases. 1mm atlases performs better region
+%   identification but requires more loading time. Default value is '2mm'.
 %   Option available only under VECTOR modality.
 %__________________________________________________________________________
 %SYSTEM REQUIREMENTS
 %  NifTI and ANALYZE tool (version > 2012-10-12)
+%  https://it.mathworks.com/matlabcentral/fileexchange/8797-tools-for-nifti-and-analyze-image
 %__________________________________________________________________________
 %ACKNOWLEDGEMENTS
-%  This function ueses some of the available FSL atlases:
+%  This function uses some of the available FSL atlases:
 %  https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Atlases
 %__________________________________________________________________________
 %
@@ -282,11 +283,11 @@ global roi2atlas_atlas_roi_struct
 
 a=roi2atlas_atlas_roi_struct;
 
-for i = length(a):-1:1
+for l = length(a):-1:1
     
-    if sum(i==atlas_selector) == 0
+    if sum(l==atlas_selector) == 0
         
-        a(i) = [];
+        a(l) = [];
                 
     end
     
@@ -297,9 +298,9 @@ end
 
 function [a] = roi_process(roi,a)
 
-for i=1:length(a)
+for l=1:length(a)
     
-    temp = a(i).volume(roi == 1);
+    temp = a(l).volume(roi == 1);
     
     label_index = unique(temp);
     label_freq = nan(length(label_index),1);
@@ -322,7 +323,7 @@ for i=1:length(a)
     label_freq(label_index == 0) = [];
     label_index(label_index == 0) = [];
          
-    a(i).label = [];   
+    a(l).label = [];   
     
     [sorted_label_freq,sorted_label_freq_index] = sort(label_freq,'descend');
     
@@ -330,19 +331,19 @@ for i=1:length(a)
         
         if isempty(label_index)
             
-            a(i).label{j} = [];
+            a(l).label{j} = [];
             break
             
         end
                
-        start_index = strfind(a(i).xml_loaded,['index="',num2str(label_index(sorted_label_freq_index(j)) - 1),'"']);
+        start_index = strfind(a(l).xml_loaded,['index="',num2str(label_index(sorted_label_freq_index(j)) - 1),'"']);
         
-        tmp = a(i).xml_loaded(start_index:end);
+        tmp = a(l).xml_loaded(start_index:end);
         
         tmp_inf = strfind(tmp,'>');
         tmp_sup = strfind(tmp,'<');
         
-        a(i).label{j} = [num2str(sorted_label_freq(j)*100,'%2.0f'),'% ',tmp(tmp_inf(1) +1 :tmp_sup(1) - 1)];
+        a(l).label{j} = [num2str(sorted_label_freq(j)*100,'%2.0f'),'% ',tmp(tmp_inf(1) +1 :tmp_sup(1) - 1)];
         
            
     end
@@ -429,9 +430,9 @@ global roi2atlas_atlas_vector_struct
 
 a=roi2atlas_atlas_vector_struct;
 
-for i = length(a):-1:1
-    if sum(i==atlas_selector) == 0  
-        a(i) = [];      
+for l = length(a):-1:1
+    if sum(l==atlas_selector) == 0  
+        a(l) = [];      
     end
 end
 
@@ -440,13 +441,13 @@ end
 
 function [a] = vector_process(xyz,a)
 
-for i=1:length(a)
+for l=1:length(a)
     
-    temp = a(i).volume(xyz(1),xyz(2),xyz(3),:);
+    temp = a(l).volume(xyz(1),xyz(2),xyz(3),:);
     
     temp =squeeze(temp);
     
-    a(i).label = [];   
+    a(l).label = [];   
     
     if sum(temp) == 0
         continue 
@@ -462,14 +463,14 @@ for i=1:length(a)
           
             count = count +1;
 
-            start_index = strfind(a(i).xml_loaded,['index="',num2str(temp_index(j) - 1),'"']);
+            start_index = strfind(a(l).xml_loaded,['index="',num2str(temp_index(j) - 1),'"']);
 
-            tmp = a(i).xml_loaded(start_index:end);
+            tmp = a(l).xml_loaded(start_index:end);
 
             tmp_inf = strfind(tmp,'>');
             tmp_sup = strfind(tmp,'<');
 
-            a(i).label{count} = [num2str(temp_sort(j),'%2.0f'),'% ',tmp(tmp_inf(1) +1 :tmp_sup(1) - 1)];
+            a(l).label{count} = [num2str(temp_sort(j),'%2.0f'),'% ',tmp(tmp_inf(1) +1 :tmp_sup(1) - 1)];
                 
         end
     end
@@ -512,9 +513,9 @@ end
 function [output] = prepare_output(a)
 output = [];
 
-for i=1:length(a)
-    output(i).name = a(i).name;
-    output(i).label = a(i).label;
+for l=1:length(a)
+    output(l).name = a(l).name;
+    output(l).label = a(l).label;
 end
 
 return
@@ -530,14 +531,14 @@ if strcmp(b.modality,'vec')
     fprintf('\n> Resolution:\t\t%s',b.vector.resolution)
 else
     fprintf('roi');
-    fprintf('\n> Thrshold:\t\t%d%%',b.roi.thr)
+    fprintf('\n> Threshold:\t\t%d%%',b.roi.thr)
 end
 fprintf('\n> Mumber of atlases:\t%d\n',length(b.atlas_selector))
 fprintf('___________________________________________\n');
 total_label_found = 0;
 
-for i=1:length(a)
-    if ~isempty(a(i).label)
+for l=1:length(a)
+    if ~isempty(a(l).label)
         total_label_found = total_label_found + 1;
     end
 end
@@ -548,11 +549,11 @@ else
     fprintf('\n> Labels found in %d atlas(es):\n',total_label_found);
 end
 
-for i=1:length(a)
-    if ~isempty(a(i).label) 
-        fprintf('\n%s',a(i).name)
-        for j=1:length(a(i).label)
-            fprintf('\n\t%s',a(i).label{j})
+for l=1:length(a)
+    if ~isempty(a(l).label) 
+        fprintf('\n%s',a(l).name)
+        for j=1:length(a(l).label)
+            fprintf('\n\t%s',a(l).label{j})
         end
         fprintf('\n');
     end
