@@ -1,5 +1,5 @@
 # mni2atlas
-FSL Anatomical Labels for MNI Vector/ROI. Mni2atlas takes in input a ROI or a vector of coordinates (both in the MNI
+FSL Anatomical Labels for MNI Vector/ROI. Mni2atlas takes an ROI or a vector of coordinates (both in the MNI
 space) and returns labels from different FSL atlases.
 
 In **VECTOR** modality labels are returned in probability values (same results of FSL atlas tool).
@@ -8,7 +8,7 @@ In **ROI** modality the probability value reported for a label represents the fr
 probability map (0, 25 or 50; default = 25).
 
 ## HOW TO USE
-   mni2atlas(VECTOR/ROI) the first input can be a MNI vector or a ROI in the MNI space. Depending on the input the script switches between two
+   mni2atlas(VECTOR/ROI) the first input can be a MNI vector or an ROI in the MNI space. Depending on the input the script switches between two
    different work modalities. With no other input the script will seek labels among all available fsl atalses.
 
    mni2atlas(VECTOR/ROI,ATLAS_SELECTOR) allows to choose among the following atlases:
@@ -24,8 +24,7 @@ probability map (0, 25 or 50; default = 25).
    
    ATLAS_SELECTOR must be a row vector (i.e. [1,3,6]). Default value is [1:1:9]. You can also leave it as an empty vector (i.e. (VECTOR/ROI,[])).
 
-   [ATLAS]=MNI2ATLAS(VECTOR/ROI,...) the script returns the structure ATLAS whit the following fields: .name (of the atlas), .labels (a cell
-   vector). No stdout will be print.
+   [ATLAS]=MNI2ATLAS(VECTOR/ROI,...) the script returns the structure ATLAS whit the following fields: .name (of the atlas), .labels (a cell vector). No stdout will be print.
 
    mni2atlas(VECTOR) prints on screen labels found for the MNI VECTOR position.
 
@@ -34,8 +33,7 @@ probability map (0, 25 or 50; default = 25).
 ### ADVANCED OPTIONS
    mni2atlas(ROI,ATLAS_SELECTOR,THR) THR allows to choose among 3 threshold levels: 0, 25, 50 (i.e,. 0, 25, 50). Default value is 25. Option available only under ROI modality.
 
-   mni2atlas(VECTOR,ATLAS_SELECTOR,RESOLUTION) RESOLUTION allows to choose between ‘1mm’ or ‘2mm’ atlases. 1mm atlases performs better region
-   identification but requires more loading time. Default value is ‘2mm’. Option available only under VECTOR modality.
+   mni2atlas(VECTOR,ATLAS_SELECTOR,RESOLUTION) RESOLUTION allows to choose between ‘1mm’ or ‘2mm’ atlases. 1mm atlases performs better region identification but requires more loading time. Default value is ‘1mm’. Option available only under VECTOR modality.
 
 ## SYSTEM REQUIREMENTS
   [NifTI and ANALYZE tool](https://it.mathworks.com/matlabcentral/fileexchange/8797-tools-for-nifti-and-analyze-image) (version > 2012-10-12) 
