@@ -45,7 +45,7 @@ function [atlas]=mni2atlas(roi,atlas_selector,thr_or_res)
 %
 %   MNI2ATLAS(VECTOR,ATLAS_SELECTOR,RESOLUTION) RESOLUTION allows to
 %   choose between '1mm' or '2mm' atlases. 1mm atlases performs better region
-%   identification but requires more loading time. Default value is '2mm'.
+%   identification but requires more loading time. Default value is '1mm'.
 %   Option available only under VECTOR modality.
 %__________________________________________________________________________
 %SYSTEM REQUIREMENTS
@@ -95,7 +95,7 @@ end
 if nargin < 3 || isempty(thr_or_res)
     %default values:
     thr = 25;
-    resolution = '2mm';  %you can also put '1mm' but the result will be almost the same but much more time demanding
+    resolution = '1mm';  
 elseif ischar(thr_or_res)
     if strcmp(thr_or_res,'1mm') || strcmp(thr_or_res,'2mm')
         resolution = thr_or_res;
@@ -470,7 +470,7 @@ for l=1:length(a)
             tmp_inf = strfind(tmp,'>');
             tmp_sup = strfind(tmp,'<');
 
-            a(l).label{count} = [num2str(temp_sort(j),'%2.0f'),'% ',tmp(tmp_inf(1) +1 :tmp_sup(1) - 1)];
+            a(l).label{count} = [num2str(temp_sort(j),'%2.1f'),'% ',tmp(tmp_inf(1) +1 :tmp_sup(1) - 1)];
                 
         end
     end
@@ -482,22 +482,15 @@ end
 function [xyz] = mni2xyz(mni,vs)
 
 if vs == 2
-
     origin = [45 63 36]; % [X Y Z]
-    
-    mni(1) = vs*round(mni(1)/vs);
-    mni(2) = vs*fix(mni(2)/vs);
-    mni(3) = vs*fix(mni(3)/vs);
-
 elseif vs == 1
-    
     origin = [91 126 72]; % [X Y Z]
-
 end
 
-xyz(1)=origin(1) + mni(1)/vs +1;      %was origin(1) - mni(1)/vs
-xyz(2)=mni(2)/vs + origin(2) +1;
-xyz(3)=mni(3)/vs + origin(3) +1;
+
+xyz(1)=origin(1) + round(mni(1)/vs) +1;      %was origin(1) - mni(1)/vs
+xyz(2)=origin(2) + round(mni(2)/vs) +1;
+xyz(3)=origin(3) + round(mni(3)/vs) +1;
             
 return
 end
