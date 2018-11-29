@@ -1,15 +1,14 @@
 function [atlas]=mni2atlas(roi,atlas_selector,thr_or_res)
-%MNI2ATLAS: takes in input a ROI or a vector of coordinates (both in the MNI
-%space) and returns labels from different FSL atlases.
+%MNI2ATLAS: from MNI VECTOR/ROI to FSL anatomical labels
 %
 %In VECTOR modality labels are returned in probability values (same results
-%of fsl atlas tool).
+%of FSL atlas tool).
 %In ROI modality the probability value reported for a label represents the
-%frequency of that label in the roi for a given threshold of fsl atlas
+%frequency of that label in the ROI for a given threshold of the FSL atlas
 %probability map (0%, 25% or 50%; default = 25%).
 %__________________________________________________________________________
 %HOW TO USE
-%   MNI2ATLAS(VECTOR/ROI) the first input can be a MNI vector or a ROI in
+%   MNI2ATLAS(VECTOR/ROI) the first input can be a MNI vector or an ROI in
 %   the MNI space. Depending on the input the script switches between two
 %   different work modalities. With no other input the script will seek labels
 %   among the available fsl atalses.
@@ -29,14 +28,14 @@ function [atlas]=mni2atlas(roi,atlas_selector,thr_or_res)
 %   [1:1:9]. You can also leave it as an empty vector (i.e., (VECTOR/ROI,[])).
 %
 %   [ATLAS]=MNI2ATLAS(VECTOR/ROI,...) the script returns the structure          
-%   ATLAS whit the following fields: .name (of the atlas), .labels (a cell
+%   ATLAS with the following fields: .name (of the atlas), .labels (a cell
 %   vector). No stdout will be print.
 %
 %   MNI2ATLAS(VECTOR) prints on screen labels found for the MNI VECTOR
 %   position.
 %
 %   MNI2ATLAS(ROI) prints on screen labels found for the input ROI. ROI can 
-%   be a preloaded (with load_nii) volume or the path of a nifti volume. 
+%   be a preloaded (with load_nii) volume or the path to a nifti volume. 
 %
 %ADVANCED OPTIONS
 %   MNI2ATLAS(ROI,ATLAS_SELECTOR,THR) THR allows to choose among 3 threshold
@@ -49,19 +48,18 @@ function [atlas]=mni2atlas(roi,atlas_selector,thr_or_res)
 %   Option available only under VECTOR modality.
 %__________________________________________________________________________
 %SYSTEM REQUIREMENTS
-%  NifTI and ANALYZE tool (version > 2012-10-12)
-%  https://it.mathworks.com/matlabcentral/fileexchange/8797-tools-for-nifti-and-analyze-image
+%  <a href="matlab:
+%web('https://it.mathworks.com/matlabcentral/fileexchange/8797-tools-for-nifti-and-analyze-image')">NifTI and ANALYZE tool</a> (version > 2012-10-12)
 %__________________________________________________________________________
 %ACKNOWLEDGEMENTS
-%  This function uses some of the available FSL atlases:
-%  https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Atlases
-%__________________________________________________________________________
-%
-% First version: 2013      
-% Author:
-%   Daniele Mascali
-%   Enrico Fermi Center, MARBILab, Rome
-%   danielemascali@gmail.com
+%  This function uses some of the available <a href="matlab:
+%web('https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Atlases')">FSL atlases</a>.
+%__________________________________________________________________________ 
+%Daniele Mascali @ Enrico Fermi Center, MARBILab, Rome
+%danielemascali@gmail.com
+
+% First version: 2013
+% Major update: 2018
 
 %end of help
 
