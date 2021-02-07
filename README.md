@@ -1,4 +1,5 @@
-# mni2atlas
+[![View mni2atlas on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://it.mathworks.com/matlabcentral/fileexchange/87047-mni2atlas)
+# mni2atlas 
 FSL Anatomical Labels for MNI Vector/ROI. Mni2atlas takes an ROI or a vector of coordinates (both in the MNI
 space) and returns labels from different FSL atlases.
 
