@@ -217,8 +217,7 @@ function load_atlas_roi(thr,resolution)
 
 global roi2atlas_atlas_roi_struct roi2atlas_roi_check_input
 
-ST = dbstack('-completenames');
-[p,~,~] = fileparts(ST(end-1).file);
+[p,~,~] = fileparts(which('mni2atlas'));
 base_path = [p,'/atlases/'];
 roi2atlas_atlas_roi_struct(1).path = [base_path,'Juelich/Juelich-maxprob-thr',num2str(thr),'-',resolution,'.nii.gz'];
 roi2atlas_atlas_roi_struct(2).path = [base_path,'HarvardOxford/HarvardOxford-cort-maxprob-thr',num2str(thr),'-',resolution,'.nii.gz'];
@@ -365,8 +364,7 @@ function load_atlas_vector(resolution)
 
 global roi2atlas_atlas_vector_struct roi2atlas_vector_check_input
 
-ST = dbstack('-completenames');
-[p,~,~] = fileparts(ST(end-1).file);
+[p,~,~] = fileparts(which('mni2atlas'));
 base_path = [p,'/atlases/'];
 roi2atlas_atlas_vector_struct(1).path = [base_path,'Juelich/Juelich-prob-',resolution,'.nii.gz'];
 roi2atlas_atlas_vector_struct(2).path = [base_path,'HarvardOxford/HarvardOxford-cort-prob-',resolution,'.nii.gz'];
